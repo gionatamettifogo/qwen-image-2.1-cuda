@@ -2,6 +2,7 @@
 set -euo pipefail
 HERE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$HERE"
+mkdir -p models outputs logs
 if ! docker info >/dev/null 2>&1; then
   echo "Docker is unavailable or the current user cannot access it." >&2
   exit 1
