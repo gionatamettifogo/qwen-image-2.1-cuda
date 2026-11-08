@@ -22,7 +22,7 @@ Both hosts used the same INT8 ConvRot diffusion checkpoint, BF16 VAE, Q4_K_M tex
 | Unicorn text-to-image, seed 28417 | 32.765 s | 288.438 s |
 | Woman-at-harbor with two reference images, seed 73023 | 165.620 s | 566.506 s |
 
-These are local generation times, including per-request model loading, and excluding model download and image upload. The first NVIDIA DGX Spark model download took 198.539 s for approximately 14 GB; subsequent requests used the local cache.
+The table records the original matched comparison; the Minisforum AI X1 Pro timings and committed samples used --offload-to-cpu. A later direct CLI rerun of the unicorn text case without that flag completed at 768×1024 and 20 steps in 269.99 s. The two-reference case has not yet been remeasured without the flag. Times include per-request model loading and exclude image upload and initial model downloads. The first NVIDIA DGX Spark GB10 128GB model download took 198.539 s for approximately 14 GB; subsequent requests used its local cache.
 
 ## Example outputs from the NVIDIA DGX Spark GB10 128GB
 
