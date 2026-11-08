@@ -1,6 +1,6 @@
-# Qwen Image 2.1 on DGX Spark
+# Qwen Image 2.1 on NVIDIA DGX Spark GB10 128GB
 
-A headless, SSH-operated local image-generation service for NVIDIA DGX Spark. The container compiles upstream stable-diffusion.cpp with CUDA for compute capability 12.1 and refuses to start without the NVIDIA GPU.
+A headless, SSH-operated local image-generation service for the NVIDIA DGX Spark GB10 128GB. The container compiles upstream stable-diffusion.cpp with CUDA for compute capability 12.1 and refuses to start without the NVIDIA GPU.
 
 The diffusion transformer uses the INT8 ConvRot Qwen Image 2.1 checkpoint, with a BF16 VAE and a Q4_K_M Qwen3-VL 8B GGUF text/vision encoder. The API accepts prompts with up to ten reference images.
 
@@ -8,23 +8,23 @@ The diffusion transformer uses the INT8 ConvRot Qwen Image 2.1 checkpoint, with 
 
 | Host | OS and kernel | GPU and host driver | Container and acceleration |
 |---|---|---|---|
-| Sparky, this repo | Ubuntu 24.04.5 LTS; Linux 7.0.0-1019-nvidia | NVIDIA GB10, compute capability 12.1; driver 595.99.02. NVIDIA-SMI reports CUDA 13.2 support. | Docker 29.6.2; NVIDIA CUDA 12.9.1 Ubuntu 24.04 image; stable-diffusion.cpp compiled for sm_121. |
-| Seratonin, ROCm comparison | Ubuntu 24.04.5 LTS; Linux 7.0.0-38-generic | AMD Radeon 890M, gfx1150, integrated into Ryzen AI 9 HX370. rocm-smi driver report: 7.0.0-38-generic (same as the host kernel release). | Docker 29.8.0; ROCm 7.2.1 PyTorch image on Ubuntu 24.04; HIPBLAS build for gfx1150. |
+| NVIDIA DGX Spark GB10 128GB, this repo | Ubuntu 24.04.5 LTS; Linux 7.0.0-1019-nvidia | NVIDIA GB10, compute capability 12.1, in a 128 GB unified-memory system; driver 595.99.02. NVIDIA-SMI reports CUDA 13.2 support. | Docker 29.6.2; NVIDIA CUDA 12.9.1 Ubuntu 24.04 image; stable-diffusion.cpp compiled for sm_121. |
+| Seratonin, ROCm comparison | Ubuntu 24.04.5 LTS; Linux 7.0.0-38-generic | AMD Radeon 890M, gfx1150, integrated into Ryzen AI 9 HX370. rocm-smi reports driver 7.0.0-38-generic, matching the host kernel release. | Docker 29.8.0; ROCm 7.2.1 PyTorch image on Ubuntu 24.04; HIPBLAS build for gfx1150. |
 
-Seratonin is a Minisforum AI X1 Pro with AMD Ryzen AI 9 HX370 (12 cores / 24 threads, up to 5.1 GHz), Radeon 890M, 96 GB DDR5, and a 2 TB PCIe 4.0 SSD. The ROCm container receives the host GPU through /dev/kfd and /dev/dri. On Sparky, the host driver is newer than the CUDA 12.9.1 runtime in the application container; NVIDIA-SMI's CUDA 13.2 value describes driver compatibility, while the service container uses CUDA 12.9.1.
+Seratonin is a Minisforum AI X1 Pro with AMD Ryzen AI 9 HX370 (12 cores / 24 threads, up to 5.1 GHz), Radeon 890M, 96 GB DDR5, and a 2 TB PCIe 4.0 SSD. The ROCm container receives the host GPU through /dev/kfd and /dev/dri. On the NVIDIA DGX Spark GB10 128GB, the host driver is newer than the CUDA 12.9.1 runtime in the application container; NVIDIA-SMI's CUDA 13.2 value describes driver compatibility, while the service container uses CUDA 12.9.1.
 
 ## Matched test results
 
 Both hosts used the same INT8 ConvRot diffusion checkpoint, BF16 VAE, Q4_K_M text/vision encoder, prompts, reference images, seeds, 768×1024 output size, and 20 steps.
 
-| Test | Sparky, NVIDIA GB10 | Seratonin, Radeon 890M |
+| Test | NVIDIA DGX Spark GB10 128GB | Seratonin, Radeon 890M |
 |---|---:|---:|
 | Unicorn text-to-image, seed 28417 | 32.765 s | 288.438 s |
 | Woman-at-harbor with two reference images, seed 73023 | 165.620 s | 566.506 s |
 
-These are local generation times, including per-request model loading, and excluding model download and image upload. The first Spark model download took 198.539 s for approximately 14 GB; subsequent requests used the local cache.
+These are local generation times, including per-request model loading, and excluding model download and image upload. The first NVIDIA DGX Spark model download took 198.539 s for approximately 14 GB; subsequent requests used the local cache.
 
-## Example outputs from Sparky
+## Example outputs from the NVIDIA DGX Spark GB10 128GB
 
 These committed PNGs are the outputs from the two matched tests. The reference-conditioned test uses the portrait and harbor images in tests/assets/.
 
@@ -43,7 +43,7 @@ The sample files are tracked under tests/results/ and arrive with git pull. The 
     ./start.sh
     ./stop.sh
 
-The API binds to 127.0.0.1:8188. Reach it over SSH with:
+The API binds to 127.0.0.1:8188. The configured SSH host alias is sparky:
 
     ssh -N -L 8188:127.0.0.1:8188 sparky
 
