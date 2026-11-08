@@ -19,7 +19,7 @@ Then call `http://127.0.0.1:8188/generate`. The first generation downloads appro
 
     python3 tests/generate_examples.py
 
-This generates a text-only image and an image using two reference assets. Set `TEST_SIZE` or `TEST_STEPS` to change the default 512×512, eight-step smoke runs.
+The text and reference tests use the same prompts and seeds as the Seratonin repo for host-to-host comparison. They default to 768×1024 and 20 steps. Set `TEST_WIDTH`, `TEST_HEIGHT`, or `TEST_STEPS` to adjust them. The two reference images are in `tests/assets/`.
 
 ## Timing
 
