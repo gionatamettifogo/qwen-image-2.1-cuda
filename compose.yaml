@@ -1,0 +1,21 @@
+services:
+  qwen-image:
+    build: .
+    image: qwen-image-2.1-cuda:local
+    container_name: qwen-image-2.1-cuda
+    restart: unless-stopped
+    user: "1000:1000"
+    gpus: all
+    ipc: host
+    shm_size: 8gb
+    ports:
+      - "127.0.0.1:${PORT:-8188}:8188"
+    environment:
+      HF_HOME: /models/huggingface
+      DEFAULT_STEPS: ${DEFAULT_STEPS:-20}
+      HF_TOKEN: ${HF_TOKEN:-}
+    volumes:
+      - ./models:/models
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+      - ./server.py:/app/server.py:ro
