@@ -6,18 +6,18 @@ The diffusion transformer uses the INT8 ConvRot Qwen Image 2.1 checkpoint, with 
 
 ## Tested systems and acceleration stack
 
-| Host | OS and kernel | GPU and host driver | Container and acceleration |
+| Hardware | OS and kernel | GPU and host driver | Container and acceleration |
 |---|---|---|---|
 | NVIDIA DGX Spark GB10 128GB, this repo | Ubuntu 24.04.5 LTS; Linux 7.0.0-1019-nvidia | NVIDIA GB10, compute capability 12.1, in a 128 GB unified-memory system; driver 595.99.02. NVIDIA-SMI reports CUDA 13.2 support. | Docker 29.6.2; NVIDIA CUDA 12.9.1 Ubuntu 24.04 image; stable-diffusion.cpp compiled for sm_121. |
-| Seratonin, ROCm comparison | Ubuntu 24.04.5 LTS; Linux 7.0.0-38-generic | AMD Radeon 890M, gfx1150, integrated into Ryzen AI 9 HX370. rocm-smi reports driver 7.0.0-38-generic, matching the host kernel release. | Docker 29.8.0; ROCm 7.2.1 PyTorch image on Ubuntu 24.04; HIPBLAS build for gfx1150. |
+| Minisforum AI X1 Pro, ROCm comparison | Ubuntu 24.04.5 LTS; Linux 7.0.0-38-generic | AMD Radeon 890M, gfx1150, integrated into Ryzen AI 9 HX370. rocm-smi reports driver 7.0.0-38-generic, matching the host kernel release. | Docker 29.8.0; ROCm 7.2.1 PyTorch image on Ubuntu 24.04; HIPBLAS build for gfx1150. |
 
-Seratonin is a Minisforum AI X1 Pro with AMD Ryzen AI 9 HX370 (12 cores / 24 threads, up to 5.1 GHz), Radeon 890M, 96 GB DDR5, and a 2 TB PCIe 4.0 SSD. The ROCm container receives the host GPU through /dev/kfd and /dev/dri. On the NVIDIA DGX Spark GB10 128GB, the host driver is newer than the CUDA 12.9.1 runtime in the application container; NVIDIA-SMI's CUDA 13.2 value describes driver compatibility, while the service container uses CUDA 12.9.1.
+The Minisforum AI X1 Pro has an AMD Ryzen AI 9 HX370 (12 cores / 24 threads, up to 5.1 GHz), Radeon 890M, 96 GB DDR5, and a 2 TB PCIe 4.0 SSD. The ROCm container receives the host GPU through /dev/kfd and /dev/dri. On the NVIDIA DGX Spark GB10 128GB, the host driver is newer than the CUDA 12.9.1 runtime in the application container; NVIDIA-SMI's CUDA 13.2 value describes driver compatibility, while the service container uses CUDA 12.9.1.
 
 ## Matched test results
 
 Both hosts used the same INT8 ConvRot diffusion checkpoint, BF16 VAE, Q4_K_M text/vision encoder, prompts, reference images, seeds, 768×1024 output size, and 20 steps.
 
-| Test | NVIDIA DGX Spark GB10 128GB | Seratonin, Radeon 890M |
+| Test | NVIDIA DGX Spark GB10 128GB | Minisforum AI X1 Pro, Radeon 890M |
 |---|---:|---:|
 | Unicorn text-to-image, seed 28417 | 32.765 s | 288.438 s |
 | Woman-at-harbor with two reference images, seed 73023 | 165.620 s | 566.506 s |
@@ -40,18 +40,20 @@ The sample files are tracked under tests/results/ and arrive with git pull. The 
 
 ## Run the service
 
+Run these commands on the machine where this checkout is installed:
+
     ./start.sh
     ./stop.sh
 
-The API binds to 127.0.0.1:8188. The configured SSH host alias is sparky:
+The API binds to 127.0.0.1:8188. To reach it from another computer, replace user@your-host with your SSH destination:
 
-    ssh -N -L 8188:127.0.0.1:8188 sparky
+    ssh -N -L 8188:127.0.0.1:8188 user@your-host
 
 The first generation downloads approximately 14 GB of model weights into models/.
 
 ## Reproduce the tests
 
-With the service running:
+With the service running on the host:
 
     python3 tests/generate_examples.py
 
